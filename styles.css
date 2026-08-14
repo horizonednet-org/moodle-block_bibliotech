@@ -1,0 +1,18 @@
+.block_bibliotech_container {
+    font-family: inherit;
+}
+
+.block_bibliotech_container .btn-primary {
+    background-color: #008080;
+    border-color: #006666;
+    color: #ffffff;
+}
+
+.block_bibliotech_container .btn-primary:hover {
+    background-color: #006666;
+    border-color: #004d4d;
+}
+
+.block_bibliotech_container .card-title {
+    font-size: 1.05rem;
+}
