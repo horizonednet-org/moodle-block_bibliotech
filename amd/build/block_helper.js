@@ -21,7 +21,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['core/modal_factory', 'core/notification'], function(ModalFactory, Notification) {
+define(['core/modal_factory', 'core/notification', 'core/modal_events'], function(ModalFactory, Notification, ModalEvents) {
     'use strict';
 
     let activeInstanceId = 0;
@@ -29,6 +29,7 @@ define(['core/modal_factory', 'core/notification'], function(ModalFactory, Notif
     let activeSesskey = '';
     let activeWwwroot = '';
     let activeModal = null;
+    let originalProcessContentItemReturnData = null;
 
     function extractResourceData(data) {
         if (!data) {
@@ -91,6 +92,20 @@ define(['core/modal_factory', 'core/notification'], function(ModalFactory, Notif
         };
     }
 
+    function cleanupBlockModalHandler(modal) {
+        if (originalProcessContentItemReturnData !== null) {
+            window.processContentItemReturnData = originalProcessContentItemReturnData;
+            originalProcessContentItemReturnData = null;
+        }
+
+        const m = modal || activeModal;
+        if (m) {
+            m.destroy();
+        }
+        activeModal = null;
+        activeInstanceId = 0;
+    }
+
     function saveResource(resData) {
         if (!resData || !activeInstanceId) {
             return;
@@ -114,27 +129,13 @@ define(['core/modal_factory', 'core/notification'], function(ModalFactory, Notif
         }).then(function(res) {
             return res.json();
         }).then(function() {
-            if (activeModal) {
-                activeModal.destroy();
-            }
+            cleanupBlockModalHandler(activeModal);
             window.location.reload();
         }).catch(function(err) {
-            if (activeModal) {
-                activeModal.destroy();
-            }
+            cleanupBlockModalHandler(activeModal);
             Notification.exception(err);
         });
     }
-
-    // Define global callback expected by Moodle LTI Deep Linking return (mod_lti/contentitem_return)
-    window.processContentItemReturnData = function(returnData) {
-        const resData = extractResourceData(returnData);
-        if (resData) {
-            saveResource(resData);
-        } else if (activeModal) {
-            activeModal.destroy();
-        }
-    };
 
     function setupAddButton(btnId, scope, instanceId, sesskey, wwwroot, deeplinkUrl) {
         const btn = document.getElementById(btnId);
@@ -149,6 +150,23 @@ define(['core/modal_factory', 'core/notification'], function(ModalFactory, Notif
             activeSesskey = sesskey;
             activeWwwroot = wwwroot;
 
+            if (typeof window.processContentItemReturnData === 'function') {
+                originalProcessContentItemReturnData = window.processContentItemReturnData;
+            }
+
+            window.processContentItemReturnData = function(returnData) {
+                if (activeModal && activeInstanceId) {
+                    const resData = extractResourceData(returnData);
+                    if (resData) {
+                        saveResource(resData);
+                    } else if (activeModal) {
+                        cleanupBlockModalHandler(activeModal);
+                    }
+                } else if (typeof originalProcessContentItemReturnData === 'function') {
+                    originalProcessContentItemReturnData(returnData);
+                }
+            };
+
             const targetUrl = deeplinkUrl || (wwwroot + '/local/bibliotech/select_content.php');
             const modalTitle = (scope === 'shared') ? 'Select Shared Publication' : 'Select Personal Quicklink';
 
@@ -160,6 +178,10 @@ define(['core/modal_factory', 'core/notification'], function(ModalFactory, Notif
             }).then(function(modal) {
                 activeModal = modal;
                 modal.show();
+
+                modal.getRoot().on(ModalEvents.hidden, function() {
+                    cleanupBlockModalHandler(modal);
+                });
 
                 const handleMessage = function(event) {
                     const iframe = document.getElementById('bibliotech_block_iframe');
