@@ -34,9 +34,17 @@ $blockinstanceid = required_param('instanceid', PARAM_INT);
 $action = required_param('action', PARAM_ALPHA);
 $scope = optional_param('scope', 'personal', PARAM_ALPHA); // 'personal' or 'shared'
 $returnurl = optional_param('returnurl', $CFG->wwwroot, PARAM_LOCALURL);
+$isajax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+    || optional_param('ajax', 0, PARAM_BOOL);
 
 // Verify user has active subscription access.
 if (!class_exists('\local_bibliotech\access_manager') || !\local_bibliotech\access_manager::has_access()) {
+    if ($isajax) {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => get_string('access_denied', 'local_bibliotech')]);
+        exit;
+    }
     print_error('access_denied', 'local_bibliotech');
 }
 
@@ -76,6 +84,12 @@ if ($action === 'add') {
         $uuid = $id;
     }
     if (empty($uuid)) {
+        if ($isajax) {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => get_string('invalidparameter', 'error')]);
+            exit;
+        }
         print_error('invalidparameter', 'error');
     }
 
@@ -119,9 +133,10 @@ if ($action === 'add') {
         }
     }
 
-    if (is_ajax()) {
+    if ($isajax) {
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['status' => 'success', 'scope' => $scope]);
-        die();
+        exit;
     }
 } else if ($action === 'remove') {
     $uuid = required_param('uuid', PARAM_ALPHANUMEXT);
@@ -146,9 +161,10 @@ if ($action === 'add') {
         $blockinstance->instance_config_save($config);
     }
 
-    if (is_ajax()) {
+    if ($isajax) {
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['status' => 'success', 'scope' => $scope]);
-        die();
+        exit;
     }
 }
 
