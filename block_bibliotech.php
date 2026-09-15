@@ -122,16 +122,11 @@ class block_bibliotech extends block_base {
             $html .= html_writer::end_div();
 
             // Primary App Open Button
-            $mainlaunchparams = [];
-            if (!empty($COURSE->id) && $COURSE->id != SITEID) {
-                $mainlaunchparams['course'] = $COURSE->id;
-            }
-            $mainlaunchurl = new moodle_url('/local/bibliotech/launch.php', $mainlaunchparams);
             $html .= html_writer::start_div('mb-3');
             $html .= html_writer::tag('a', get_string('open_app_button', 'local_bibliotech'), [
-                'href' => $mainlaunchurl->out(false),
+                'href' => 'bibliotech://',
                 'class' => 'btn btn-primary btn-block w-100 font-weight-bold shadow-sm',
-                'target' => '_blank'
+                'target' => '_self'
             ]);
             $html .= html_writer::end_div();
 
