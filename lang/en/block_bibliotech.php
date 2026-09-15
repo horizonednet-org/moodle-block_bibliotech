@@ -38,8 +38,8 @@ $string['section_category_resources'] = 'Category Resources';
 $string['section_site_resources'] = 'Site Resources';
 $string['section_personal_quicklinks'] = '⭐ My Personal Quicklinks';
 
-$string['open_in_app'] = 'Open in App';
-$string['open_in_app_title'] = 'Open and borrow publication in Bibliotech App';
+$string['open_in_app'] = 'Open in Bibliotech';
+$string['open_in_app_title'] = 'Open and read publication in Bibliotech';
 $string['remove'] = 'Remove';
 $string['remove_confirm_personal'] = 'Remove this quicklink from your list?';
 $string['remove_confirm_shared'] = 'Remove shared publication for all users?';

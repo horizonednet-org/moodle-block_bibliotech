@@ -122,11 +122,16 @@ class block_bibliotech extends block_base {
             $html .= html_writer::end_div();
 
             // Primary App Open Button
+            $mainlaunchparams = [];
+            if (!empty($COURSE->id) && $COURSE->id != SITEID) {
+                $mainlaunchparams['course'] = $COURSE->id;
+            }
+            $mainlaunchurl = new moodle_url('/local/bibliotech/launch.php', $mainlaunchparams);
             $html .= html_writer::start_div('mb-3');
             $html .= html_writer::tag('a', get_string('open_app_button', 'local_bibliotech'), [
-                'href' => 'bibliotech://',
+                'href' => $mainlaunchurl->out(false),
                 'class' => 'btn btn-primary btn-block w-100 font-weight-bold shadow-sm',
-                'target' => '_self'
+                'target' => '_blank'
             ]);
             $html .= html_writer::end_div();
 
@@ -205,7 +210,14 @@ class block_bibliotech extends block_base {
                         $title = !empty($res['title']) ? $res['title'] : 'Bibliotech Publication';
                         $addedby = !empty($res['addedby_name']) ? get_string('added_by', 'block_bibliotech', s($res['addedby_name'])) : '';
 
-                        $applink = "bibliotech://publication/{$kind}/{$uuid}";
+                        $launchparams = [
+                            'id' => $uuid,
+                            'title' => $title,
+                        ];
+                        if (!empty($COURSE->id) && $COURSE->id != SITEID) {
+                            $launchparams['course'] = $COURSE->id;
+                        }
+                        $launchurl = new moodle_url('/local/bibliotech/launch.php', $launchparams);
                         $removeurl = new moodle_url('/blocks/bibliotech/action.php', [
                             'instanceid' => $instanceid,
                             'action' => 'remove',
@@ -223,8 +235,9 @@ class block_bibliotech extends block_base {
 
                         $html .= html_writer::start_div('d-flex w-100 justify-content-between align-items-center');
                         $html .= html_writer::tag('a', get_string('open_in_app', 'block_bibliotech'), [
-                            'href' => $applink,
+                            'href' => $launchurl->out(false),
                             'class' => 'btn btn-sm btn-info text-white py-0 px-2 small font-weight-bold',
+                            'target' => '_blank',
                             'title' => get_string('open_in_app_title', 'block_bibliotech')
                         ]);
 
@@ -280,7 +293,14 @@ class block_bibliotech extends block_base {
                     $kind = !empty($res['kind']) ? $res['kind'] : 'book';
                     $title = !empty($res['title']) ? $res['title'] : 'Bibliotech Publication';
 
-                    $applink = "bibliotech://publication/{$kind}/{$uuid}";
+                    $launchparams = [
+                        'id' => $uuid,
+                        'title' => $title,
+                    ];
+                    if (!empty($COURSE->id) && $COURSE->id != SITEID) {
+                        $launchparams['course'] = $COURSE->id;
+                    }
+                    $launchurl = new moodle_url('/local/bibliotech/launch.php', $launchparams);
                     $removeurl = new moodle_url('/blocks/bibliotech/action.php', [
                         'instanceid' => $instanceid,
                         'action' => 'remove',
@@ -295,8 +315,9 @@ class block_bibliotech extends block_base {
 
                     $html .= html_writer::start_div('d-flex w-100 justify-content-between align-items-center');
                     $html .= html_writer::tag('a', get_string('open_in_app', 'block_bibliotech'), [
-                        'href' => $applink,
+                        'href' => $launchurl->out(false),
                         'class' => 'btn btn-sm btn-info text-white py-0 px-2 small font-weight-bold',
+                        'target' => '_blank',
                         'title' => get_string('open_in_app_title', 'block_bibliotech')
                     ]);
 
