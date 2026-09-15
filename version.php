@@ -24,11 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026091400;
+$plugin->version = 2026091401;
 $plugin->requires = 2024100700;
 $plugin->component = 'block_bibliotech';
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '0.2.3';
+$plugin->release = '0.2.4';
 $plugin->dependencies = [
     'local_bibliotech' => 2026081300,
 ];

@@ -76,17 +76,27 @@ define(['core/modal_factory', 'core/notification', 'core/modal_events'], functio
             uuid = item.uuid || customParams.uuid || '';
         }
 
-        // 3. Fallback to id / publication_id
-        if (!uuid) {
-            uuid = item.id || customParams.publication_id || customParams.id || customParams.resource_id || '';
+        // 3. Extract numeric publication_id / id
+        let numericId = '';
+        if (customParams.publication_id && /^\d+$/.test(customParams.publication_id.toString().trim())) {
+            numericId = customParams.publication_id.toString().trim();
+        } else if (item.id && /^\d+$/.test(item.id.toString().trim())) {
+            numericId = item.id.toString().trim();
+        } else if (customParams.id && /^\d+$/.test(customParams.id.toString().trim())) {
+            numericId = customParams.id.toString().trim();
         }
 
-        if (!uuid) {
+        if (!uuid && numericId) {
+            uuid = numericId;
+        }
+
+        if (!uuid && !numericId) {
             return null;
         }
 
         return {
             title: title,
+            id: numericId,
             uuid: uuid,
             kind: kind
         };
@@ -116,7 +126,8 @@ define(['core/modal_factory', 'core/notification', 'core/modal_events'], functio
         formData.append('action', 'add');
         formData.append('scope', activeScope);
         formData.append('title', resData.title);
-        formData.append('uuid', resData.uuid);
+        formData.append('id', resData.id || '');
+        formData.append('uuid', resData.uuid || '');
         formData.append('kind', resData.kind);
         formData.append('sesskey', activeSesskey);
 

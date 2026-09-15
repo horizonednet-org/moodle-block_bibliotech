@@ -77,13 +77,28 @@ if ($scope === 'shared' && !$canmanage) {
 
 if ($action === 'add') {
     $title = required_param('title', PARAM_TEXT);
-    $uuid = optional_param('uuid', '', PARAM_ALPHANUMEXT);
-    $id = optional_param('id', '', PARAM_ALPHANUMEXT);
+    $uuid = optional_param('uuid', '', PARAM_RAW);
+    $id = optional_param('id', '', PARAM_RAW);
+
+    if (class_exists('\local_bibliotech\publication_resolver')) {
+        if (empty($id) && !empty($uuid)) {
+            $resolvedid = \local_bibliotech\publication_resolver::resolve_id($uuid);
+            if ($resolvedid) {
+                $id = (string)$resolvedid;
+            }
+        }
+        if (empty($uuid) && !empty($id)) {
+            $resolveduuid = \local_bibliotech\publication_resolver::resolve_uuid($id);
+            if ($resolveduuid) {
+                $uuid = $resolveduuid;
+            }
+        }
+    }
 
     if (empty($uuid) && !empty($id)) {
         $uuid = $id;
     }
-    if (empty($uuid)) {
+    if (empty($uuid) && empty($id)) {
         if ($isajax) {
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(400);

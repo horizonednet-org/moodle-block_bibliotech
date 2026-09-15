@@ -205,15 +205,20 @@ class block_bibliotech extends block_base {
                 if (!empty($sharedresources)) {
                     $html .= html_writer::start_div('list-group list-group-flush');
                     foreach ($sharedresources as $res) {
-                        $uuid = !empty($res['uuid']) ? $res['uuid'] : (!empty($res['id']) ? $res['id'] : '');
+                        $uuid = !empty($res['uuid']) ? $res['uuid'] : '';
+                        $numericid = !empty($res['id']) ? $res['id'] : '';
+                        $pubid = !empty($numericid) ? $numericid : $uuid;
                         $kind = !empty($res['kind']) ? $res['kind'] : 'book';
                         $title = !empty($res['title']) ? $res['title'] : 'Bibliotech Publication';
                         $addedby = !empty($res['addedby_name']) ? get_string('added_by', 'block_bibliotech', s($res['addedby_name'])) : '';
 
                         $launchparams = [
-                            'id' => $uuid,
+                            'id' => $pubid,
                             'title' => $title,
                         ];
+                        if (!empty($uuid)) {
+                            $launchparams['uuid'] = $uuid;
+                        }
                         if (!empty($COURSE->id) && $COURSE->id != SITEID) {
                             $launchparams['course'] = $COURSE->id;
                         }
@@ -289,14 +294,19 @@ class block_bibliotech extends block_base {
             if (!empty($personalresources)) {
                 $html .= html_writer::start_div('list-group list-group-flush');
                 foreach ($personalresources as $res) {
-                    $uuid = !empty($res['uuid']) ? $res['uuid'] : (!empty($res['id']) ? $res['id'] : '');
+                    $uuid = !empty($res['uuid']) ? $res['uuid'] : '';
+                    $numericid = !empty($res['id']) ? $res['id'] : '';
+                    $pubid = !empty($numericid) ? $numericid : $uuid;
                     $kind = !empty($res['kind']) ? $res['kind'] : 'book';
                     $title = !empty($res['title']) ? $res['title'] : 'Bibliotech Publication';
 
                     $launchparams = [
-                        'id' => $uuid,
+                        'id' => $pubid,
                         'title' => $title,
                     ];
+                    if (!empty($uuid)) {
+                        $launchparams['uuid'] = $uuid;
+                    }
                     if (!empty($COURSE->id) && $COURSE->id != SITEID) {
                         $launchparams['course'] = $COURSE->id;
                     }
