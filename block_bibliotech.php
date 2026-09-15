@@ -124,7 +124,7 @@ class block_bibliotech extends block_base {
             // Primary App Open Button
             $html .= html_writer::start_div('mb-3');
             $html .= html_writer::tag('a', get_string('open_app_button', 'local_bibliotech'), [
-                'href' => 'bibliotech://',
+                'href' => 'bibliotech://bookshelf',
                 'class' => 'btn btn-primary btn-block w-100 font-weight-bold shadow-sm',
                 'target' => '_self'
             ]);
@@ -233,11 +233,20 @@ class block_bibliotech extends block_base {
                             $html .= html_writer::tag('div', s($addedby), ['class' => 'extra-small text-muted mb-2']);
                         }
 
+                        // Construct direct native app deep link for shared resource (omits tokens to prevent account impersonation).
+                        $appuri = !empty($res['uri']) ? $res['uri'] : '';
+                        if (empty($appuri)) {
+                            $appuri = !empty($uuid) ? "bibliotech://publication/{$kind}/{$uuid}" : "bibliotech://publication/{$kind}/{$pubid}";
+                        }
+                        if (strpos($appuri, '?') !== false) {
+                            $appuri = explode('?', $appuri)[0];
+                        }
+
                         $html .= html_writer::start_div('d-flex w-100 justify-content-between align-items-center');
                         $html .= html_writer::tag('a', get_string('open_in_app', 'block_bibliotech'), [
-                            'href' => $launchurl->out(false),
+                            'href' => $appuri,
                             'class' => 'btn btn-sm btn-info text-white py-0 px-2 small font-weight-bold',
-                            'target' => '_blank',
+                            'target' => '_self',
                             'title' => get_string('open_in_app_title', 'block_bibliotech')
                         ]);
 
@@ -318,11 +327,20 @@ class block_bibliotech extends block_base {
                     $html .= html_writer::start_div('list-group-item p-2 d-flex flex-column border rounded mb-2 bg-white shadow-sm');
                     $html .= html_writer::tag('div', html_writer::tag('strong', s($title)), ['class' => 'small text-dark mb-2']);
 
+                    // Construct direct native app deep link with personal authentication token & lcpKey if available.
+                    $appuri = !empty($res['uri']) ? $res['uri'] : '';
+                    if (empty($appuri)) {
+                        $appuri = !empty($uuid) ? "bibliotech://publication/{$kind}/{$uuid}" : "bibliotech://publication/{$kind}/{$pubid}";
+                        if (!empty($res['token']) && !empty($res['lcpkey'])) {
+                            $appuri .= '?token=' . urlencode($res['token']) . '&lcpKey=' . urlencode($res['lcpkey']);
+                        }
+                    }
+
                     $html .= html_writer::start_div('d-flex w-100 justify-content-between align-items-center');
                     $html .= html_writer::tag('a', get_string('open_in_app', 'block_bibliotech'), [
-                        'href' => $launchurl->out(false),
+                        'href' => $appuri,
                         'class' => 'btn btn-sm btn-info text-white py-0 px-2 small font-weight-bold',
-                        'target' => '_blank',
+                        'target' => '_self',
                         'title' => get_string('open_in_app_title', 'block_bibliotech')
                     ]);
 

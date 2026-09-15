@@ -109,7 +109,17 @@ if ($action === 'add') {
     }
 
     $kind = optional_param('kind', 'book', PARAM_ALPHA);
-    $uri = "bibliotech://publication/{$kind}/{$uuid}";
+    $token = optional_param('token', '', PARAM_RAW);
+    $lcpkey = optional_param('lcpkey', '', PARAM_RAW);
+
+    // Build supported deep link URI (with token & lcpKey only for personal quicklinks to prevent account impersonation).
+    if ($scope === 'personal' && !empty($token) && !empty($lcpkey) && !empty($uuid)) {
+        $uri = "bibliotech://publication/{$kind}/{$uuid}?token=" . urlencode($token) . "&lcpKey=" . urlencode($lcpkey);
+    } else if (!empty($uuid)) {
+        $uri = "bibliotech://publication/{$kind}/{$uuid}";
+    } else {
+        $uri = "bibliotech://publication/{$kind}/{$id}";
+    }
 
     $newitem = [
         'id' => $id,
@@ -117,6 +127,8 @@ if ($action === 'add') {
         'title' => $title,
         'kind' => $kind,
         'uri' => $uri,
+        'token' => ($scope === 'personal') ? $token : '',
+        'lcpkey' => ($scope === 'personal') ? $lcpkey : '',
         'timeadded' => time(),
         'addedby_id' => $userid,
         'addedby_name' => fullname($USER)

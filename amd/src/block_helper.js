@@ -94,11 +94,16 @@ define(['core/modal_factory', 'core/notification', 'core/modal_events'], functio
             return null;
         }
 
+        const token = customParams.token || customParams.Token || item.token || '';
+        const lcpKey = customParams.lcpkey || customParams.lcpKey || customParams.LcpKey || item.lcpKey || item.lcpkey || '';
+
         return {
             title: title,
             id: numericId,
             uuid: uuid,
-            kind: kind
+            kind: kind,
+            token: token,
+            lcpKey: lcpKey
         };
     }
 
@@ -129,6 +134,8 @@ define(['core/modal_factory', 'core/notification', 'core/modal_events'], functio
         formData.append('id', resData.id || '');
         formData.append('uuid', resData.uuid || '');
         formData.append('kind', resData.kind);
+        formData.append('token', resData.token || '');
+        formData.append('lcpkey', resData.lcpKey || '');
         formData.append('sesskey', activeSesskey);
 
         fetch(activeWwwroot + '/blocks/bibliotech/action.php', {
